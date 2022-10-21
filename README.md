@@ -85,6 +85,7 @@ Slowly's `setup` function can accept the following configuration options:
 * `save_path`         defaults to `~/.cache/nvim/slowly/`
 * `plugins`           is a list of plugin tables with the following values:
    - `url`            required field of the fully-qualified `git`  URL string
-   - `start`          optional boolean to direct plugin to install in `start/` 
+   - `start`          optional boolean to direct plugin to install in `start/`\*
    - `checkout`       optional string for a tag, branch, or commit to checkout
 
+*Note:* by default, all plugins install to `opt/`.
