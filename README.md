@@ -1,4 +1,4 @@
-slowly.nvim 🐌
+slowly.nvim 🐢
 ==============
 Slowly is a Neovim plugin manager for people who value simplicity over speed.
 It is neither *blazingly fast* nor the most advanced solution, but rather the
@@ -9,9 +9,9 @@ and if you want the kitchen sink included, you should use Packer instead.
 
 Here's a friendly comparison of Slowly to other plugin managers:
 
-|                  Advantages              |       Disadvantages       |
-| ---------------------------------------- | ------------------------- |
-| Can actually understand whats happening  | Goes slowly, few features |
+|                  Advantages                |       Disadvantages       |
+| ------------------------------------------ | ------------------------- |
+| Can actually understand what is happening  | Goes slowly, few features |
 
 Requirements
 ------------
