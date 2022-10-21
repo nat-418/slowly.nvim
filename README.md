@@ -72,10 +72,12 @@ Slowly provides a single command `:Slowly` with a few subcommands:
 * `:Slowly install`   to `git clone` plugins configured in the `setup` options.
 * `:Slowly reinstall` to delete all configured plugins and clone them again.
 * `:Slowly save`      to make a tarball of installed plugins.
-* `:Slowly update`    to `git pull` plugins configured in the `setup` options.\*
+* `:Slowly update`    to `git pull` plugins configured in the `setup` options.
 * `:Slowly restore`   to delete all plugins and reload from the `save` tarball
 
-\* `:Slowly update` will automatically `:Slowly save` before `git pull`-ing.
+*Note:* `:Slowly update` will automatically `:Slowly save` before `git pull`-ing.
+Only one save tarball exists at a time. If you need more advancded snapshotting
+and backups, ask your filesystem.
 
 Configuration
 -------------
