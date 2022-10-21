@@ -76,7 +76,7 @@ Slowly provides a single command `:Slowly` with a few subcommands:
 * `:Slowly restore`   to delete all plugins and reload from the `save` tarball
 
 *Note:* `:Slowly update` will automatically `:Slowly save` before `git pull`-ing.
-Only one save tarball exists at a time. If you need more advancded snapshotting
+Only one save tarball can exist at a time. If you need more advancded snapshotting
 and backups, ask your filesystem.
 
 Configuration
