@@ -57,13 +57,13 @@ end
 M.install = function(opts)
   if opts               == nil then return bail('bad install input') end
   if opts.install_path  == nil then return bail('bad install path')  end
-  if opts.plugins_table == nil then return bail('bad plugins table') end
+  if opts.plugins       == nil then return bail('bad plugins table') end
 
   vim.fn.mkdir(opts.install_path .. 'start/', 'p')
   vim.fn.mkdir(opts.install_path .. 'opt/',   'p')
 
   local count = 0
-  for index, plugin in ipairs(opts.plugins_table) do
+  for index, plugin in ipairs(opts.plugins) do
     if plugin.url == nil then return bail('bad plugin URL') end
 
     count             = index
@@ -96,14 +96,14 @@ end
 
 
 M.update = function(opts)
-  if opts               == nil then return bail('bad update input')  end
-  if opts.install_path  == nil then return bail('bad install path')  end
-  if opts.plugins_table == nil then return bail('bad plugins table') end
+  if opts              == nil then return bail('bad update input')  end
+  if opts.install_path == nil then return bail('bad install path')  end
+  if opts.plugins      == nil then return bail('bad plugins table') end
 
   vim.fn.mkdir(opts.install_path, 'p')
 
   local count = 0
-  for index, plugin in ipairs(opts.plugins_table) do
+  for index, plugin in ipairs(opts.plugins) do
     if plugin.url == nil then return bail('bad plugin URL') end
 
     count             = index
@@ -152,7 +152,7 @@ M.run = function(subcommand, opts)
 end
 
 M.setup = function(opts)
-  if opts == nil or opts.plugins_table == nil then
+  if opts == nil or opts.plugins == nil then
     return bail('bad configuration')
   end
 

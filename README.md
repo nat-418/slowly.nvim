@@ -37,7 +37,7 @@ require('slowly').setup({
     'netrwSettings',
     'netrwFileHandlers'
   },
-  plugins_table = {
+  plugins = {
     {url = 'https://github.com/nvim-lua/plenary.nvim',    start = true},
     {url = 'https://github.com/elihunter173/dirbuf.nvim', start = true},
     {url = 'https://github.com/nat-418/bufala.nvim'},
@@ -83,7 +83,7 @@ Slowly's `setup` function can accept the following configuration options:
 * `disabled_builtins` Builtin Neovim plugins to disable
 * `install_path`      defaults to `~/.local/share/nvim/site/pack/slowly/`
 * `save_path`         defaults to `~/.cache/nvim/slowly/`
-* `plugins_table`     is a list of plugin tables with the following values:
+* `plugins`           is a list of plugin tables with the following values:
    - `url`            required field of the fully-qualified `git`  URL string
    - `start`          optional boolean to direct plugin to install in `start/` 
    - `checkout`       optional string for a tag, branch, or commit to checkout
