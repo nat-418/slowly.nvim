@@ -60,10 +60,11 @@ end
 ```
 
 In this example we want to replace the old vim default plugin `netrw` with
-the excellent `dirbuf.nvim`, and we want `dirbuf` to be loaded automatically on
-startup along with `plenary`—a common dependency required by other plugins. 
-We also install a few optional plugins and then explicitly load them only
-when `example_condition` is met. 
+the excellent [dirbuf.nvim](https://github.com/elihunter173/dirbuf.nvim),
+and we want `dirbuf` to be loaded automatically on startup along with
+`plenary`—a common dependency required by other plugins. We also install a
+few optional plugins and then explicitly load them only when
+`example_condition` is met. 
 
 Usage
 -----
