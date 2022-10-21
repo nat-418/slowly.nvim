@@ -1,180 +1,189 @@
 local M = {}
 
+local function bail(message)
+  print('Slowly Error: ' ..  message)
+  return false
+end
+
 local function tilde(path)
   return string.gsub(path, vim.fn.expand('$HOME'), '~')
 end
 
-local function git_url2dir(url)
-  local first_attempt = string.match(url, ".*/(.*)%.git$")
+local function basename(git_url)
+  local first_attempt = string.match(git_url, ".*/(.*)%.git$")
   if first_attempt == nil then
-    local second_attempt = string.match(url, ".*/(.*)$")
+    local second_attempt = string.match(git_url, ".*/(.*)$")
     return second_attempt
   end
   return first_attempt
 end
 
-M.save = function(install_path, save_path)
-  if install_path == nil then return false end
-  if save_path  == nil then return false end
+M.save = function(opts)
+  if opts               == nil then return bail('bad save input')   end
+  if opts.install_path  == nil then return bail('bad install path') end
+  if opts.save_path     == nil then return bail('bad save path')    end
 
-  local tarball = save_path .. 'save.tar.gz'
+  local save =
+    '!cd ' .. opts.install_path
+     .. ' && tar -czf ' .. opts.save_path .. 'save.tar.gz .'
 
-  vim.fn.delete(save_path, 'rf')
-  vim.fn.mkdir(save_path, 'p')
-
-  local save = '!cd ' .. install_path .. ' && ' .. 'tar -czf ' .. tarball .. ' .'
-
+  vim.fn.delete(opts.save_path, 'rf')
+  vim.fn.mkdir(opts.save_path, 'p')
   vim.cmd(tilde(save))
 
   return true
 end
 
-M.restore = function(install_path, save_path)
-  if install_path == nil then return false end
-  if save_path  == nil then return false end
+M.restore = function(opts)
+  if opts               == nil then return bail('bad restore input') end
+  if opts.install_path  == nil then return bail('bad install path')  end
+  if opts.save_path     == nil then return bail('bad save path')     end
 
-  local tarball = save_path .. 'save.tar.gz'
+  local tarball = opts.save_path .. 'save.tar.gz'
+  local restore = '!tar -xzf ' .. tarball .. ' -C ' .. opts.install_path
 
   if not vim.fn.filereadable(tarball) then
     print('Error: no save tarball found')
     return false
   end
 
-  vim.fn.delete(install_path, 'rf')
-  vim.fn.mkdir(install_path, 'p')
-
-  local restore = '!tar -xzf ' .. tarball .. ' -C ' .. install_path
-
+  vim.fn.delete(opts.install_path, 'rf')
+  vim.fn.mkdir(opts.install_path, 'p')
   vim.cmd(tilde(restore))
 
   return true
 end
 
-M.install = function(install_path, urls)
-  if install_path == nil then return false end
-  if urls         == nil then return false end
+M.install = function(opts)
+  if opts               == nil then return bail('bad install input') end
+  if opts.install_path  == nil then return bail('bad install path')  end
+  if opts.plugins       == nil then return bail('bad plugins table') end
 
-  vim.fn.mkdir(install_path, 'p')
+  vim.fn.mkdir(opts.install_path .. 'start/', 'p')
+  vim.fn.mkdir(opts.install_path .. 'opt/',   'p')
 
-  for _, url in ipairs(urls) do
-    local dir     = git_url2dir(url)
-    local install = '!git -C ' .. install_path .. ' clone --depth 1 ' .. url
-    if vim.fn.isdirectory(install_path .. dir) == 0 then
+  local count = 0
+  for index, plugin in ipairs(opts.plugins) do
+    if plugin.url == nil then return bail('bad plugin URL') end
+
+    count             = index
+    local dirname     = basename(plugin.url)
+    local destination = opts.install_path .. 'opt/'
+    if plugin.start then destination = opts.install_path .. 'start/' end
+
+    local install = '!git -C ' .. destination .. ' clone --depth 1 ' .. plugin.url
+
+    if vim.fn.isdirectory(destination .. dirname) ~= 0 then
+      print('Already installed: ' .. tilde(dirname))
+    else
       vim.cmd(tilde(install))
-    else
-      print('Already installed: ' .. tilde(dir))
+    end
+
+    if plugin.checkout ~= nil then
+      local plugin_path = tilde(destination .. dirname)
+      vim.cmd(
+        '!cd ' .. plugin_path
+        .. ' && git fetch --unshallow'
+        .. ' && git checkout ' .. plugin.checkout
+      )
     end
   end
+
+  print('Slowly finished installing ' .. count .. ' plugins')
 
   return true
 end
 
-M.update = function(install_path, urls)
-  if install_path == nil then return false end
-  if urls         == nil then return false end
 
-  vim.fn.mkdir(install_path, 'p')
+M.update = function(opts)
+  if opts              == nil then return bail('bad update input')  end
+  if opts.install_path == nil then return bail('bad install path')  end
+  if opts.plugins      == nil then return bail('bad plugins table') end
 
-  for _, url in ipairs(urls) do
-    local dir    = git_url2dir(url)
-    local update = '!cd ' .. install_path .. dir .. ' && git pull'
-    if vim.fn.isdirectory(install_path .. dir) == 1 then
+  vim.fn.mkdir(opts.install_path, 'p')
+
+  local count = 0
+  for index, plugin in ipairs(opts.plugins) do
+    if plugin.url == nil then return bail('bad plugin URL') end
+
+    count             = index
+    local dirname     = basename(plugin.url)
+    local destination = opts.install_path .. 'opt/'
+    if plugin.start then destination = opts.install_path .. 'start/' end
+
+    local update = '!cd ' .. destination .. dirname .. ' && git pull'
+
+    if vim.fn.isdirectory(destination .. dirname) == 0 then
+      print('Not installed: ' .. tilde(dirname))
+    else
       vim.cmd(tilde(update))
-    else
-      print('Not installed: ' .. tilde(dir))
+    end
+
+    if plugin.checkout ~= nil then
+      local plugin_path = tilde(destination .. dirname)
+      vim.cmd(
+        '!cd ' .. plugin_path
+        .. ' && git fetch --unshallow'
+        .. ' && git checkout ' .. plugin.checkout
+      )
     end
   end
+
+  print('Slowly finished updating ' .. count .. ' plugins')
 
   return true
 end
 
-M.reinstall = function(install_path, urls)
-  if install_path == nil then return false end
-  if urls         == nil then return false end
+M.reinstall = function(opts)
+  if opts               == nil then return bail('bad reinstall input') end
+  if opts.install_path  == nil then return bail('bad install path')    end
 
-  vim.fn.delete(install_path, 'rf')
-
-  M.install(install_path, urls)
-
-  return true
+  vim.fn.delete(opts.install_path, 'rf')
+  return M.install(opts)
 end
 
 M.run = function(subcommand, opts)
-  if subcommand == nil or opts == nil then
-    print('Error: bad input')
-    return false
-  end
-
-  local start_path = opts.install_path .. 'start/'
-  local opt_path   = opts.install_path .. 'opt/'
-
-  if subcommand == 'save' then
-    M.save(opts.install_path, opts.save_path)
-  end
-
-  if subcommand == 'restore' then
-    M.restore(opts.install_path, opts.save_path)
-  end
-
-  if subcommand == 'install' then
-    M.install(start_path, opts.start_urls)
-    M.install(opt_path,   opts.opt_urls)
-  end
-
-  if subcommand == 'update' then
-    M.save(opts.install_path, opts.save_path)
-    M.update(start_path, opts.start_urls)
-    M.update(opt_path,   opts.opt_urls)
-  end
-
-  if subcommand == 'reinstall' then
-    M.reinstall(start_path, opts.start_urls)
-    M.reinstall(opt_path,   opts.opt_urls)
-  end
-
-  return false
+  if subcommand == nil or opts == nil then return bail('bad run input')  end
+  if subcommand == 'install'          then return M.install(opts)        end
+  if subcommand == 'save'             then return M.save(opts)           end
+  if subcommand == 'restore'          then return M.restore(opts)        end
+  if subcommand == 'update'           then return M.update(opts)         end
+  if subcommand == 'reinstall'        then return M.reinstall(opts)      end
 end
 
 M.setup = function(opts)
-  if opts == nil then return false end
+  if opts == nil or opts.plugins == nil then
+    return bail('bad configuration')
+  end
 
-  if opts.disabled_plugins == nil then
-    opts.disabled_plugins = {}
+  if opts.disabled_plugins ~= nil then
+    for _, plugin in ipairs(opts.disabled_builtins) do
+      vim.g["loaded_" .. plugin] = 1
+    end
   end
 
   if opts.install_path == nil then
     opts.install_path = vim.fn.expand('$HOME/.local/share/nvim/site/pack/slowly/')
-    if opts.install_path == nil then return false end
   end
 
   if opts.save_path == nil then
     opts.save_path = vim.fn.expand('$HOME/.cache/nvim/slowly/')
-    if opts.save_path == nil then return false end
   end
 
-  for _, plugin in ipairs(opts.disabled_builtins) do
-    vim.g["loaded_" .. plugin] = 1
-  end
-
-  vim.api.nvim_create_user_command(
-    'Slowly',
-    function(args)
+  return vim.api.nvim_create_user_command('Slowly', function(args)
       M.run(args.args, opts)
       vim.cmd('silent! helptags ALL')
-    end,
-    {
-      nargs = 1,
-      complete = function()
+    end, {
+      nargs = 1, complete = function()
         return {
+          'install',
           'save',
           'restore',
-          'install',
           'update',
           'reinstall'
         }
-      end
-    }
-  )
+    end
+  })
 end
 
 return M
