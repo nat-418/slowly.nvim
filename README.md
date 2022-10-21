@@ -1,5 +1,5 @@
-slowly.nvim 
-===========
+slowly.nvim 🐌
+==============
 Slowly is a Neovim plugin manager for people who value simplicity over speed.
 It is neither *blazingly fast* nor the most advanced solution, but rather the
 bare minimum of what I need. Slowly handles installing, updating, and
