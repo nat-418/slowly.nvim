@@ -167,7 +167,7 @@ M.setup = function(opts)
     return bail('bad configuration')
   end
 
-  if opts.disabled_plugins ~= nil then
+  if opts.disabled_builtins ~= nil then
     for _, plugin in ipairs(opts.disabled_builtins) do
       vim.g["loaded_" .. plugin] = 1
     end
