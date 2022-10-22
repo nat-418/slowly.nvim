@@ -9,9 +9,11 @@ and if you want the kitchen sink included, you should use Packer instead.
 
 Here's a friendly comparison of Slowly to other plugin managers:
 
-|                  Advantages                |       Disadvantages       |
-| ------------------------------------------ | ------------------------- |
-| Can actually understand what is happening  | Goes slowly, few features |
+|                  Advantages                   |    Disadvantages     |
+| --------------------------------------------- | -------------------  |
+| You can acually understand what is happening  | Plugin works slowly  |
+| Simple and easy to use                        | Only basic features  |
+| Few dependencies, install is copying one file | No flashy animations |
 
 Requirements
 ------------
