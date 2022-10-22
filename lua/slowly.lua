@@ -24,11 +24,11 @@ M.save = function(opts)
   if opts.save_path     == nil then return bail('bad save path')    end
 
   local save =
-    '!cd ' .. opts.install_path
+    '!cd ' .. tilde(opts.install_path)
      .. ' && tar -czf ' .. opts.save_path .. 'save.tar.gz .'
 
-  vim.fn.delete(opts.save_path, 'rf')
-  vim.fn.mkdir(opts.save_path, 'p')
+  vim.cmd('!rm -rf '   .. tilde(opts.save_path))
+  vim.cmd('!mkdir -p ' .. tilde(opts.save_path))
   vim.cmd(tilde(save))
 
   return true
@@ -47,8 +47,8 @@ M.restore = function(opts)
     return false
   end
 
-  vim.fn.delete(opts.install_path, 'rf')
-  vim.fn.mkdir(opts.install_path, 'p')
+  vim.cmd('!rm -rf '   .. tilde(opts.install_path))
+  vim.cmd('!mkdir -p ' .. tilde(opts.install_path))
   vim.cmd(tilde(restore))
 
   return true
@@ -59,8 +59,8 @@ M.install = function(opts)
   if opts.install_path  == nil then return bail('bad install path')  end
   if opts.plugins       == nil then return bail('bad plugins table') end
 
-  vim.fn.mkdir(opts.install_path .. 'start/', 'p')
-  vim.fn.mkdir(opts.install_path .. 'opt/',   'p')
+  vim.cmd('!mkdir -p ' .. tilde(opts.install_path) .. 'start/')
+  vim.cmd('!mkdir -p ' .. tilde(opts.install_path) .. 'opt/')
 
   local count = 0
   for index, plugin in ipairs(opts.plugins) do
@@ -83,7 +83,7 @@ M.install = function(opts)
       local plugin_path = tilde(destination .. dirname)
       vim.cmd(
         '!cd ' .. plugin_path
-        .. ' && git fetch --unshallow'
+        .. ' && git fetch --unshallow || echo "^ safe to ignore"'
         .. ' && git checkout ' .. plugin.checkout
       )
     end
@@ -100,7 +100,7 @@ M.update = function(opts)
   if opts.install_path == nil then return bail('bad install path')  end
   if opts.plugins      == nil then return bail('bad plugins table') end
 
-  vim.fn.mkdir(opts.install_path, 'p')
+  vim.cmd('!mkdir -p ' .. tilde(opts.install_path))
 
   local count = 0
   for index, plugin in ipairs(opts.plugins) do
@@ -123,7 +123,8 @@ M.update = function(opts)
       local plugin_path = tilde(destination .. dirname)
       vim.cmd(
         '!cd ' .. plugin_path
-        .. ' && git fetch --unshallow'
+        .. ' && git checkout ' .. plugin.checkout
+        .. ' || git fetch --unshallow'
         .. ' && git checkout ' .. plugin.checkout
       )
     end
@@ -138,17 +139,20 @@ M.reinstall = function(opts)
   if opts               == nil then return bail('bad reinstall input') end
   if opts.install_path  == nil then return bail('bad install path')    end
 
-  vim.fn.delete(opts.install_path, 'rf')
+  vim.cmd('!rm -rf ' .. tilde(opts.install_path))
   return M.install(opts)
 end
 
 M.run = function(subcommand, opts)
   if subcommand == nil or opts == nil then return bail('bad run input')  end
-  if subcommand == 'install'          then return M.install(opts)        end
-  if subcommand == 'save'             then return M.save(opts)           end
-  if subcommand == 'restore'          then return M.restore(opts)        end
-  if subcommand == 'update'           then return M.update(opts)         end
-  if subcommand == 'reinstall'        then return M.reinstall(opts)      end
+
+  if subcommand == 'install'   then return M.install(opts)   end
+  if subcommand == 'save'      then return M.save(opts)      end
+  if subcommand == 'restore'   then return M.restore(opts)   end
+  if subcommand == 'update'    then return M.update(opts)    end
+  if subcommand == 'reinstall' then return M.reinstall(opts) end
+
+  return bail('subcommand does not exist')
 end
 
 M.setup = function(opts)
