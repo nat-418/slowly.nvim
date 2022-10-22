@@ -1,0 +1,64 @@
+ *slowly.txt*  A Neovim plugin manager where simplicity > speed
+
+==============================================================================
+CONTENTS                                                     *slowly-contents*
+
+    1. Introduction ......................... |slowly-introduction|
+    2. Configuration ........................ |slowly-config|
+    3. Commands ............................. |slowly-commands|
+
+==============================================================================
+1. INTRODUCTION                                          *slowly-introduction*
+
+Slowly is a Neovim plugin manager for people who value simplicity over speed.
+It is neither blazingly fast nor the most advanced solution, but rather the
+bare minimum of what I need. Slowly handles installing, updating, and
+reinstalling plugins using `git`. It does not do anything fancy.
+
+==============================================================================
+2. CONFIGURATION                                               *slowly-config*
+
+Put something like this in your $MYVIMRC: >
+    local example_condition = false
+    
+    require('slowly').setup({ 
+      disabled_builtins = {
+        'netrw',
+        'netrwPlugin',
+        'netrwSettings',
+        'netrwFileHandlers'
+      },
+      plugins = {
+        {url = 'https://github.com/nvim-lua/plenary.nvim',    start = true},
+        {url = 'https://github.com/elihunter173/dirbuf.nvim', start = true},
+        {url = 'https://github.com/nat-418/bufala.nvim'},
+        {url = 'https://github.com/nat-418/tabbot.nvim'}
+      }
+    })
+    
+    require('dirbuf').setup {
+      show_hidden = false,
+      sort_order  = 'directories_first',
+      write_cmd   = 'DirbufSync -confirm',
+    }
+    
+    if example_condition then
+      vim.cmd.packadd('bufala.nvim'); require('bufala').setup()
+      vim.cmd.packadd('tabbot.nvim'); require('tabbot').setup()
+    end
+
+In this example we want to replace the old vim default plugin `netrw` with
+the excellent `dirbuf.nvim`, and we want `dirbuf` to be loaded automatically
+on startup along with `plenary`—a common dependency required by other plugins.
+We also install a few optional plugins and then explicitly load them only when
+`example_condition` is met.
+
+==============================================================================
+2. COMMANDS                                                  *slowly-commands*
+
+:Slowly {install|reinstall|save|restore|update}                       *Slowly*
+
+Manage Neovim plugins using git, tar, etc.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
