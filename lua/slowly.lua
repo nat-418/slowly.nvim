@@ -19,7 +19,7 @@ local function basename(git_url)
 end
 
 local function subcommands()
-  return {'install', 'save', 'restore', 'update', 'reinstall'}
+  return {'install', 'save', 'restore', 'update', 'reinstall', 'list'}
 end
 
 M.save = function(opts)
@@ -27,9 +27,10 @@ M.save = function(opts)
   if opts.install_path  == nil then return bail('bad install path') end
   if opts.save_path     == nil then return bail('bad save path')    end
 
-  local save =
-    '!cd ' .. tilde(opts.install_path)
-     .. ' && tar -czf ' .. opts.save_path .. 'save.tar.gz .'
+  local save = table.concat({
+    '!cd', tilde(opts.install_path),
+     '&& tar -czf', opts.save_path .. 'save.tar.gz .'
+  }, ' ')
 
   vim.fn.delete(opts.save_path, 'rf')
   vim.fn.mkdir(opts.save_path,  'p')
@@ -87,11 +88,16 @@ M.install = function(opts)
 
     if plugin.checkout ~= nil and not isInstalled() then
       local plugin_path = tilde(destination .. dirname)
-      vim.cmd(
-        '!cd ' .. plugin_path
-        .. ' && git fetch --unshallow || echo "^ safe to ignore"'
-        .. ' && git checkout ' .. plugin.checkout
-      )
+      vim.cmd(table.concat({
+        '!cd', plugin_path,
+        '&& git fetch --unshallow || echo "^ safe to ignore"',
+        '&& git checkout', plugin.checkout
+      }, ' '))
+    end
+
+    if plugin.run ~= nil and isInstalled() then
+      local plugin_path = tilde(destination .. dirname)
+      vim.cmd('!cd ' .. plugin_path .. ' && ' .. plugin.run)
     end
   end
 
@@ -129,12 +135,16 @@ M.update = function(opts)
 
     if plugin.checkout ~= nil then
       local plugin_path = tilde(destination .. dirname)
-      vim.cmd(
-        '!cd ' .. plugin_path
-        .. ' && git checkout ' .. plugin.checkout
-        .. ' || git fetch --unshallow'
-        .. ' && git checkout ' .. plugin.checkout
-      )
+      vim.cmd(table.concat({
+        '!cd', plugin_path, '&& git checkout', plugin.checkout,
+        '|| git fetch --unshallow',
+        '&& git checkout', plugin.checkout
+      }, ' '))
+    end
+
+    if plugin.run ~= nil then
+      local plugin_path = tilde(destination .. dirname)
+      vim.cmd('!cd ' .. plugin_path .. ' && ' .. plugin.run)
     end
   end
 
@@ -147,6 +157,39 @@ M.reinstall = function(opts)
 
   vim.fn.delete(opts.install_path, 'rf')
   return M.install(opts)
+end
+
+M.list = function(opts)
+  if opts              == nil then return bail('bad update input')  end
+  if opts.install_path == nil then return bail('bad install path')  end
+  if opts.plugins      == nil then return bail('bad plugins table') end
+
+  vim.fn.mkdir(opts.install_path, 'p')
+
+  local count = 0
+  for index, plugin in ipairs(opts.plugins) do
+    if plugin.url == nil then return bail('bad plugin URL') end
+
+    count             = index
+    local dirname     = basename(plugin.url)
+    local destination = opts.install_path .. 'opt/'
+    if plugin.start then destination = opts.install_path .. 'start/' end
+
+    local show = table.concat({
+      'cd', destination .. dirname,
+      '&& printf "%-32s%-15s%s" "$(basename $PWD)"',
+      '"$(git name-rev --name-only HEAD)"',
+      '"$(git show -s --format=%s)"'
+    }, ' ')
+
+    if vim.fn.isdirectory(destination .. dirname) == 0 then
+      print('Not installed: ' .. tilde(dirname))
+    else
+      print(vim.fn.system(tilde(show)))
+    end
+  end
+
+  return print('Slowly finished listing ' .. count .. ' plugins')
 end
 
 M.run = function(subcommand, opts)

@@ -26,8 +26,8 @@ Requirements
 Installing
 ----------
 Copy the `./lua/slowly.lua` file from this repository to
-`~/.config/nvim/lua/slowly.lua`. Then write an
-`~/.config/nvim/init.lua` like this:
+`~/.config/nvim/lua/slowly.lua`. Or, put this repository somewhere
+on your runtime path. Then write an `~/.config/nvim/init.lua` like this:
 
 ```lua
 local example_condition = false
@@ -91,5 +91,6 @@ Slowly's `setup` function can accept the following configuration options:
    - `url`            required field of the fully-qualified `git`  URL string
    - `start`          optional boolean to direct plugin to install in `start/`\*
    - `checkout`       optional string for a tag, branch, or commit to checkout
+   - `run`            optional string of a shell script to run after git commands
 
 *Note:* by default, all plugins install to `opt/`.
