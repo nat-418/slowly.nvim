@@ -19,7 +19,7 @@ local function basename(git_url)
 end
 
 local function subcommands()
-  return {'install', 'save', 'restore', 'update', 'reinstall', 'list'}
+  return {'install', 'save', 'restore', 'update', 'reinstall', 'list', 'clean'}
 end
 
 M.save = function(opts)
@@ -101,11 +101,11 @@ M.install = function(opts)
     end
   end
 
-  if count == 0 then
-    return print('Slowly installed everything already')
-  else
+  if count > 0 then
     return print('Slowly finished installing ' .. count .. ' plugins')
   end
+
+  return print('Slowly plugins are already installed')
 end
 
 M.update = function(opts)
@@ -147,7 +147,11 @@ M.update = function(opts)
     end
   end
 
-  return print('Slowly finished updating ' .. count .. ' plugins')
+  if count > 0 then
+    return print('Slowly finished updating ' .. count .. ' plugins')
+  end
+
+  return print('Slowly already updated all plugins')
 end
 
 M.reinstall = function(opts)
@@ -159,7 +163,7 @@ M.reinstall = function(opts)
 end
 
 M.list = function(opts)
-  if opts              == nil then return bail('bad update input')  end
+  if opts              == nil then return bail('bad list input')    end
   if opts.install_path == nil then return bail('bad install path')  end
   if opts.plugins      == nil then return bail('bad plugins table') end
 
@@ -188,7 +192,50 @@ M.list = function(opts)
     end
   end
 
-  return print('Slowly finished listing ' .. count .. ' plugins')
+  if count > 0 then
+    return print('Slowly finished listing ' .. count .. ' plugins')
+  end
+
+  return print('Slowly has no plugins to list')
+end
+
+M.clean = function(opts)
+  if opts              == nil then return bail('bad clean input')   end
+  if opts.install_path == nil then return bail('bad install path')  end
+  if opts.plugins      == nil then return bail('bad plugins table') end
+
+  vim.fn.mkdir(opts.install_path, 'p')
+
+  local count     = 0
+  local installed = vim.fn.globpath(opts.install_path, '*/*')
+  for installed_dir in string.gmatch(installed, '%S+') do
+    local doomed = true
+    for _, plugin in ipairs(opts.plugins) do
+      if plugin.url == nil then return bail('bad plugin URL') end
+
+      local dirname     = basename(plugin.url)
+      local destination = opts.install_path .. 'opt/'
+
+      if plugin.start then
+        destination = opts.install_path .. 'start/'
+      end
+
+      if destination .. dirname == installed_dir then
+        doomed = false
+      end
+    end
+
+    if doomed then
+      count = count + 1
+      vim.cmd('!rm -rf ' .. installed_dir)
+    end
+  end
+
+  if count > 0 then
+    return print('Slowly removed ' .. count .. ' unwanted plugins')
+  end
+
+  return print('Slowly directories are already clean')
 end
 
 M.run = function(subcommand, opts)
