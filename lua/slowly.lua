@@ -33,7 +33,7 @@ M.save = function(opts)
   sanityCheck(opts)
 
   local save = table.concat({
-    'cd', tilde(opts.install_path),
+    'cd', opts.install_path,
      '&& tar -czf', opts.save_path .. 'save.tar.gz .'
   }, ' ')
 
@@ -89,14 +89,14 @@ M.install = function(opts)
       print('Installing ' .. dirname)
       print(vim.fn.system(install))
       if plugin.run ~= nil then
-        local plugin_path = tilde(destination .. dirname)
+        local plugin_path = destination .. dirname
         print('Running ' .. plugin.run)
         print(vim.fn.system('cd ' .. plugin_path .. ' && ' .. plugin.run))
       end
     end
 
     if plugin.checkout ~= nil and not isInstalled() then
-      local plugin_path = tilde(destination .. dirname)
+      local plugin_path = destination .. dirname
       print('Checking out ' .. plugin.checkout)
       print(vim.fn.system(table.concat({
         'cd', plugin_path,
@@ -139,7 +139,7 @@ M.update = function(opts)
     end
 
     if plugin.checkout ~= nil then
-      local plugin_path = tilde(destination .. dirname)
+      local plugin_path = destination .. dirname
       print('Checking out ' .. plugin.checkout)
       print(vim.fn.system(table.concat({
         'cd', plugin_path, '&& git checkout', plugin.checkout,
@@ -149,7 +149,7 @@ M.update = function(opts)
     end
 
     if plugin.run ~= nil then
-      local plugin_path = tilde(destination .. dirname)
+      local plugin_path = destination .. dirname
       print('Running ' .. plugin.run)
       print(vim.fn.system('cd ' .. plugin_path .. ' && ' .. plugin.run))
     end
@@ -191,7 +191,7 @@ M.list = function(opts)
     }, ' ')
 
     if vim.fn.isdirectory(destination .. dirname) == 0 then
-      print('Not installed: ' .. tilde(dirname))
+      print('Not installed: ' .. dirname)
     else
       print(vim.fn.system(show))
     end
