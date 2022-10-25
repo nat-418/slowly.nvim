@@ -108,7 +108,6 @@ M.install = function(opts)
   end
 end
 
-
 M.update = function(opts)
   if opts              == nil then return bail('bad update input')  end
   if opts.install_path == nil then return bail('bad install path')  end
@@ -185,7 +184,7 @@ M.list = function(opts)
     if vim.fn.isdirectory(destination .. dirname) == 0 then
       print('Not installed: ' .. tilde(dirname))
     else
-      print(vim.fn.system(tilde(show)))
+      print(vim.fn.system(show))
     end
   end
 
