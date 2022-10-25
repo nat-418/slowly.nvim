@@ -69,12 +69,13 @@ few optional plugins and then explicitly load them only when
 Usage
 -----
 Slowly provides a single command `:Slowly` with a few subcommands:
+* `:Slowly list`      to show what is currently installed.
 * `:Slowly install`   to `git clone` plugins configured in the `setup` options.
-* `:Slowly reinstall` to delete all configured plugins and clone them again.
-* `:Slowly save`      to make a tarball of installed plugins.
 * `:Slowly update`    to `git pull` plugins configured in the `setup` options.
-* `:Slowly restore`   to delete all plugins and reload from the `save` tarball
-* `:Slowly list`      to show what is currently installed
+* `:Slowly save`      to make a tarball of installed plugins.
+* `:Slowly restore`   to delete all plugins and reload from the `save` tarball.
+* `:Slowly clean`     to remove installed plugins not listed in `setup` options.
+* `:Slowly reinstall` to delete all configured plugins and clone them again.
 
 *Note:* `:Slowly update` will automatically `:Slowly save` before
 `git pull`-ing. That way if something bad happens as a result of the update,
