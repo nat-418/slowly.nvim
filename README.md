@@ -74,6 +74,7 @@ Slowly provides a single command `:Slowly` with a few subcommands:
 * `:Slowly save`      to make a tarball of installed plugins.
 * `:Slowly update`    to `git pull` plugins configured in the `setup` options.
 * `:Slowly restore`   to delete all plugins and reload from the `save` tarball
+* `:Slowly list`      to show what is currently installed
 
 *Note:* `:Slowly update` will automatically `:Slowly save` before
 `git pull`-ing. That way if something bad happens as a result of the update,
