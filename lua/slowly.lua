@@ -118,6 +118,8 @@ M.update = function(opts)
 
   vim.fn.mkdir(opts.install_path, 'p')
 
+  M.save(opts)
+
   local count = 0
   for index, plugin in ipairs(opts.plugins) do
     if plugin.url == nil then return bail('bad plugin URL') end
