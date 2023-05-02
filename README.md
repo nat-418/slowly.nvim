@@ -2,8 +2,7 @@ slowly.nvim 🐢
 ==============
 
 *Note: I am no longer using slowly. It does work, but I have moved on to
-using [Nix and Home Manager instead](https://gist.github.com/nat-418/d76586da7a5d113ab90578ed56069509). I will still work on issues and accept
-relevant contributions to slowly, however.*
+using [Nix and Home Manager instead](https://gist.github.com/nat-418/d76586da7a5d113ab90578ed56069509).*
 
 Slowly is a Neovim plugin manager for people who value simplicity over speed.
 It is neither *blazingly fast* nor the most advanced solution, but rather the
